@@ -133,8 +133,12 @@ const statusBarHeight = isLandscape => {
     }
   }
 
+  if (isIPhoneSupportDynamicIsaland) {
+    return isLandscape ? 0 : 59;
+  }
+
   if (isIPhoneX) {
-    return isLandscape ? 0 : safeAreaTopMargin;
+    return isLandscape ? 0 : 44;
   }
 
   if (isNewIPadPro) {
@@ -389,7 +393,7 @@ export function getInset(key, isLandscape) {
     case 'horizontal':
     case 'right':
     case 'left': {
-      return isLandscape ? (isIPhoneX ? safeAreaTopMargin : 0) : 0;
+      return isLandscape ? safeAreaTopMargin : 0;
     }
     case 'vertical':
     case 'top': {
