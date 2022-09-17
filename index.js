@@ -12,19 +12,34 @@ import hoistStatics from 'hoist-non-react-statics';
 import withOrientation from './withOrientation';
 
 // See https://mydevice.io/devices/ for device dimensions
-const X_WIDTH = 375;
-const X_HEIGHT = 812;
-const XSMAX_WIDTH = 414;
-const XSMAX_HEIGHT = 896;
 const PAD_WIDTH = 768;
 const PAD_HEIGHT = 1024;
 const IPADPRO11_WIDTH = 834;
 const IPADPRO11_HEIGHT = 1194;
 const IPADPRO129_HEIGHT = 1024;
 const IPADPRO129_WIDTH = 1366;
-const IPHONE12_H = 844;
-const IPHONE12_Max = 926;
-const IPHONE12_Mini = 780;
+
+const X_WIDTH = 375;
+const X_HEIGHT = 812;
+const XSMAX_WIDTH = 414;
+const XSMAX_HEIGHT = 896;
+
+// iPhone 12 and iPhone 13 series have same screen resolution, so do iPhone 14 & iPhone 14 plus
+const IPHONE12_HEIGHT = 844;
+const IPHONE12_WIDTH = 390;
+
+const IPHONE12_MAX_HEIGHT = 926;
+const IPHONE12_MAX_WIDTH = 428;
+
+const IPHONE12_MINI_HEIGHT = 780;
+const IPHONE12_MINI_WIDTH = 360;
+
+// iPhone 14 Pro and iPhone 14 Pro Max have different screen resolution with dynamic isaland
+const IPHONE14PRO_HEIGHT = 852;
+const IPHONE14PRO_WIDTH = 393;
+
+const IPHONE14PRO_MAX_HEIGHT = 932;
+const IPHONE14PRO_MAX_WIDTH = 430;
 
 const getResolvedDimensions = () => {
   const { width, height } = Dimensions.get('window');
@@ -38,16 +53,36 @@ const { PlatformConstants = {} } = NativeModules;
 const { minor = 0 } = PlatformConstants.reactNativeVersion || {};
 
 const isIPhoneX = (() => {
-  if (Platform.OS === 'web') return false;
-
+  if (Platform.OS !== 'ios') {
+    return false;
+  }
   return (
-    (Platform.OS === 'ios' &&
-      ((D_HEIGHT === X_HEIGHT && D_WIDTH === X_WIDTH) ||
-        (D_HEIGHT === X_WIDTH && D_WIDTH === X_HEIGHT))) ||
-    ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) ||
-      (D_HEIGHT === XSMAX_WIDTH && D_WIDTH === XSMAX_HEIGHT) || 
-      (D_HEIGHT === IPHONE12_H) || (D_HEIGHT === IPHONE12_Max) || (D_HEIGHT === IPHONE12_Mini))
+    ((D_HEIGHT === X_HEIGHT && D_WIDTH === X_WIDTH) || (D_HEIGHT === X_WIDTH && D_WIDTH === X_HEIGHT)) || 
+    ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) || (D_HEIGHT === XSMAX_WIDTH && D_WIDTH === XSMAX_HEIGHT)) || 
+    ((D_HEIGHT === IPHONE12_HEIGHT && D_WIDTH === IPHONE12_WIDTH) || (D_HEIGHT === IPHONE12_WIDTH && D_WIDTH === IPHONE12_HEIGHT)) || 
+    ((D_HEIGHT === IPHONE12_MAX_HEIGHT && D_WIDTH === IPHONE12_MAX_WIDTH)  || (D_HEIGHT === IPHONE12_MAX_WIDTH && D_WIDTH === IPHONE12_MAX_HEIGHT)) || 
+    ((D_HEIGHT === IPHONE12_MINI_HEIGHT && D_WIDTH === IPHONE12_MINI_WIDTH) || (D_HEIGHT === IPHONE12_MINI_WIDTH && D_WIDTH === IPHONE12_MINI_HEIGHT))
   );
+})();
+
+const isIPhoneSupportDynamicIsaland = (() => {
+  if (Platform.OS !== 'ios') {
+    return false;
+  }
+  return (
+    ((D_HEIGHT === IPHONE14PRO_HEIGHT && D_WIDTH === IPHONE14PRO_WIDTH) || (D_HEIGHT === IPHONE14PRO_WIDTH && D_WIDTH === IPHONE14PRO_HEIGHT)) || 
+    ((D_HEIGHT === IPHONE14PRO_MAX_HEIGHT && D_WIDTH === IPHONE14PRO_MAX_WIDTH) || (D_HEIGHT === IPHONE14PRO_MAX_WIDTH && D_WIDTH === IPHONE14PRO_MAX_HEIGHT))
+  );
+})();
+
+const safeAreaTopMargin = (() => {
+  if (isIPhoneSupportDynamicIsaland) {
+    return 59;
+  }
+  if (isIPhoneX) {
+    return 44;
+  }
+  return 0;
 })();
 
 const isNewIPadPro = (() => {
@@ -99,7 +134,7 @@ const statusBarHeight = isLandscape => {
   }
 
   if (isIPhoneX) {
-    return isLandscape ? 0 : 44;
+    return isLandscape ? 0 : safeAreaTopMargin;
   }
 
   if (isNewIPadPro) {
@@ -354,7 +389,7 @@ export function getInset(key, isLandscape) {
     case 'horizontal':
     case 'right':
     case 'left': {
-      return isLandscape ? (isIPhoneX ? 44 : 0) : 0;
+      return isLandscape ? (isIPhoneX ? safeAreaTopMargin : 0) : 0;
     }
     case 'vertical':
     case 'top': {
