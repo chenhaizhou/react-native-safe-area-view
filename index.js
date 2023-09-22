@@ -222,7 +222,7 @@ class SafeView extends Component {
 
   _updateMeasurements = () => {
     if (!this._isMounted) return;
-    if (!this.view) return;
+    if (!this.view || !this.view.getNode) return;
 
     const { isLandscape } = this.props;
     const { orientation } = this.state;
