@@ -222,7 +222,7 @@ class SafeView extends Component {
 
   _updateMeasurements = () => {
     if (!this._isMounted) return;
-    if (!this.view || !this.view.getNode) return;
+    if (!this.view) return;
 
     const { isLandscape } = this.props;
     const { orientation } = this.state;
@@ -232,8 +232,8 @@ class SafeView extends Component {
     }
 
     const { width: WIDTH, height: HEIGHT } = getResolvedDimensions();
-
-    this.view.getNode().measureInWindow((winX, winY, winWidth, winHeight) => {
+    const view = this.view.measureInWindow ? this.view : this.view.getNode();
+    view.measureInWindow((winX, winY, winWidth, winHeight) => {
       if (!this.view) {
         return;
       }
